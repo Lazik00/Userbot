@@ -1,0 +1,9 @@
+# Minimal requirements for this userbot project
+telethon>=1.28.0
+aiohttp>=3.8.1
+python-dotenv>=1.0.0
+
+# Optional / dev (uncomment if you want to use them):
+# pyflakes
+# pytest
+
