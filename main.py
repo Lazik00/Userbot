@@ -16,14 +16,14 @@ API_HASH = os.getenv("API_HASH")
 MAX_HISTORY = int(os.getenv("MAX_HISTORY", 10))
 OPENROUTER_KEY = os.getenv("OPENROUTER_KEY")
 OPENROUTER_MODEL = "x-ai/grok-code-fast-1"
-OWNER_ID = int(os.getenv("OWNER_ID"))  # faqat shu IDga ruxsat
+OWNER_ID = int(os.getenv("OWNER_ID"))
 
 client = TelegramClient('session_name', API_ID, API_HASH)
 
 # 📚 Foydalanuvchi kontekstini saqlash
 user_contexts = {}
 
-# 🌐 Global AI holati faylga saqlab qo'yamiz (restartdan keyin ham qoladi)
+# 🌐 Global AI holati faylga saqlanadi (restartdan keyin ham qoladi)
 STATE_FILE = Path("ai_state.json")
 state_lock = asyncio.Lock()
 
@@ -33,7 +33,7 @@ def load_state():
             data = json.loads(STATE_FILE.read_text(encoding="utf-8"))
             return bool(data.get("ai_enabled", False))
         except Exception as e:
-            print(f"[WARN] state fayl yuklanmadi: {e}")
+            print(f"[WARN] State fayl yuklanmadi: {e}")
     return False
 
 async def save_state(enabled: bool):
@@ -41,15 +41,23 @@ async def save_state(enabled: bool):
         try:
             STATE_FILE.write_text(json.dumps({"ai_enabled": bool(enabled)}), encoding="utf-8")
         except Exception as e:
-            print(f"[ERROR] state fayl saqlanmadi: {e}")
+            print(f"[ERROR] State fayl saqlanmadi: {e}")
 
 AI_ENABLED = load_state()
 
 # 🚀 OpenRouter API javob olish
 async def get_openrouter_response(messages):
     url = "https://openrouter.ai/api/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {OPENROUTER_KEY}", "Content-Type": "application/json"}
-    payload = {"model": OPENROUTER_MODEL, "messages": messages, "temperature": 0.7, "max_tokens": 600}
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": OPENROUTER_MODEL,
+        "messages": messages,
+        "temperature": 0.7,
+        "max_tokens": 600
+    }
     try:
         async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(limit=20)) as session:
             async with session.post(url, json=payload, headers=headers, timeout=15) as resp:
@@ -60,12 +68,11 @@ async def get_openrouter_response(messages):
         print(f"[ERROR] OpenRouter API: {e}")
         return "🤖 AI javob olishda xatolik yuz berdi."
 
-# 📩 Faqat shaxsiy chatlar uchun handler (global /on va /off faqat OWNER ga)
+# 📩 Private chatlar uchun handler (global ON/OFF faqat OWNER)
 @client.on(events.NewMessage(incoming=True))
 async def handler(event):
     global AI_ENABLED
 
-    # faqat private chatlar
     if not event.is_private:
         return
 
@@ -100,12 +107,11 @@ async def handler(event):
         print("[INFO] AI turned OFF by OWNER.")
         return
 
-    # agar AI globalda o'chirilgan bo'lsa, javob bermaymiz
+    # Agar AI globalda o'chirilgan bo'lsa, javob bermaymiz
     if not AI_ENABLED:
         return
 
-    # ---------- agar AI yoqilgan bo'lsa, oddiy xabarlarni qayta ishlash ----------
-    # kontekstni yaratish
+    # ---------- Multi-turn xabarlarni qayta ishlash ----------
     if user_id not in user_contexts:
         user_contexts[user_id] = deque(maxlen=MAX_HISTORY)
 
@@ -118,7 +124,6 @@ async def handler(event):
         reply_text = await get_openrouter_response(messages)
         await event.reply(reply_text)
 
-        # kontekstga AI javobini qo'shish
         user_contexts[user_id].append({"role": "assistant", "content": reply_text})
         print(f"[INFO] Javob berildi: {user_id}")
 
