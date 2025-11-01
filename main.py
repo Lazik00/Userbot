@@ -12,19 +12,19 @@ load_dotenv()
 API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
 MAX_HISTORY = int(os.getenv("MAX_HISTORY", 10))
-OPENROUTER_KEY = os.getenv("OPENROUTER_KEY")  # ENV orqali xavfsizroq
-OPENROUTER_MODEL = "x-ai/grok-code-fast-1"  # yoki grok-4-latest
+OPENROUTER_KEY = os.getenv("OPENROUTER_KEY")
+OPENROUTER_MODEL = "x-ai/grok-code-fast-1"
 
 client = TelegramClient('session_name', API_ID, API_HASH)
 
 # 📚 Foydalanuvchi kontekstini saqlash
 user_contexts = {}
 
-# 🚀 OpenRouter API javob olish (async, tez)
+# 🌐 Global AI holati
+AI_ENABLED = False
+
+# 🚀 OpenRouter API javob olish
 async def get_openrouter_response(messages):
-    """
-    messages: list of dict [{"role": "system"/"user"/"assistant", "content": "..."}]
-    """
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {OPENROUTER_KEY}",
@@ -49,37 +49,46 @@ async def get_openrouter_response(messages):
 # 📩 Faqat shaxsiy chatlar uchun handler
 @client.on(events.NewMessage(incoming=True))
 async def handler(event):
-    if not event.is_private:  # Guruh va kanallarni chetlash
+    global AI_ENABLED
+
+    if not event.is_private:
         return
 
-    # Senderni olish (botlardan kelgan xabarlarni aniqlash uchun)
     sender = await event.get_sender()
     if sender is None or getattr(sender, "bot", False):
-        return  # Botdan kelgan xabarlarni chetlash
+        return
 
     text = event.message.message
     if not text:
         return
 
-    user_id = event.sender_id
+    # 🔹 Buyruqlarni tekshirish
+    if text.lower() == "/on":
+        AI_ENABLED = True
+        await event.reply("🤖 AI endi barcha private chatlarda ishlaydi.")
+        return
+    elif text.lower() == "/off":
+        AI_ENABLED = False
+        await event.reply("🤖 AI barcha private chatlarda to‘xtatildi.")
+        return
 
-    # Kontekst yaratish
+    # Agar AI yoqilmagan bo‘lsa, javob bermaymiz
+    if not AI_ENABLED:
+        return
+
+    user_id = event.sender_id
     if user_id not in user_contexts:
         user_contexts[user_id] = deque(maxlen=MAX_HISTORY)
 
-    # Foydalanuvchi xabarini kontekstga qo‘shish
     user_contexts[user_id].append({"role": "user", "content": text})
 
     try:
-        # System prompt + multi-turn kontekst
         messages = LAZIZ_PROMPT.copy()
         messages.extend(user_contexts[user_id])
 
-        # Javob olish
         reply_text = await get_openrouter_response(messages)
         await event.reply(reply_text)
 
-        # AI javobini kontekstga qo‘shish
         user_contexts[user_id].append({"role": "assistant", "content": reply_text})
 
         print(f"[INFO] Javob berildi: {user_id}")
