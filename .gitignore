@@ -1,0 +1,120 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+*.pot
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# virtualenv
+venv/
+ENV/
+env/
+.venv/
+
+# VS Code
+.vscode/
+
+# JetBrains
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Local env files
+.env
+.env.*
+secrets.env
+
+# SQLite
+*.sqlite3
+
+# Session and local Telegram/other sessions
+*.session
+*.session-journal
+
+# Logs and runtime
+*.log
+runtime/
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# My development artifacts
+pip-wheel-metadata/
+
+# Ignore compiled extensions
+*.pyd
+
+# Node stuff if any
+node_modules/
+
+# Ignore IDE-specific files
+*.suo
+*.ntvs*
+*.njsproj
+
+# Local test databases
+db.sqlite3
+
+# Build artifacts
+dist/
+
+# Editor backups
+*~
+
+# Session files created by this project (explicit)
+session_name.session
+session_name.session-journal
+
+# End of .gitignore
+
