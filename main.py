@@ -16,7 +16,6 @@ API_HASH = os.getenv("API_HASH")
 MAX_HISTORY = int(os.getenv("MAX_HISTORY", 10))
 OPENROUTER_KEY = os.getenv("OPENROUTER_KEY")
 OPENROUTER_MODEL = "x-ai/grok-code-fast-1"
-OWNER_ID = int(os.getenv("OWNER_ID"))
 
 client = TelegramClient('session_name', API_ID, API_HASH)
 
@@ -68,7 +67,7 @@ async def get_openrouter_response(messages):
         print(f"[ERROR] OpenRouter API: {e}")
         return "🤖 AI javob olishda xatolik yuz berdi."
 
-# 📩 Private chatlar uchun handler (global ON/OFF faqat OWNER)
+# 📩 Private chatlar uchun handler (AI holati har kim boshqarishi mumkin)
 @client.on(events.NewMessage(incoming=True))
 async def handler(event):
     global AI_ENABLED
@@ -86,25 +85,19 @@ async def handler(event):
 
     user_id = event.sender_id
 
-    # ---------- /on va /off komandalar (faqat OWNER_ID) ----------
+    # ---------- /on va /off komandalar (har kim ishlatishi mumkin) ----------
     if text.lower() == "/on":
-        if user_id != OWNER_ID:
-            await event.reply("❌ Bu komandani faqat bot egasi ishlatishi mumkin.")
-            return
         AI_ENABLED = True
         await save_state(AI_ENABLED)
         await event.reply("✅ Global AI holati: ON. Endi barcha private chatlar uchun AI javob beradi.")
-        print("[INFO] AI turned ON by OWNER.")
+        print(f"[INFO] AI turned ON by user {user_id}.")
         return
 
     if text.lower() == "/off":
-        if user_id != OWNER_ID:
-            await event.reply("❌ Bu komandani faqat bot egasi ishlatishi mumkin.")
-            return
         AI_ENABLED = False
         await save_state(AI_ENABLED)
         await event.reply("⛔ Global AI holati: OFF. Endi hech kimga avtomatik javob berilmaydi.")
-        print("[INFO] AI turned OFF by OWNER.")
+        print(f"[INFO] AI turned OFF by user {user_id}.")
         return
 
     # Agar AI globalda o'chirilgan bo'lsa, javob bermaymiz
@@ -133,6 +126,6 @@ async def handler(event):
 
 # 🔥 Bot ishga tushishi
 if __name__ == "__main__":
-    print("[INFO] Telegram AI userbot ishga tushdi (global ON/OFF — faqat OWNER boshqaradi).")
+    print("[INFO] Telegram AI userbot ishga tushdi (global ON/OFF — har kim boshqarishi mumkin).")
     client.start()
     client.run_until_disconnected()
