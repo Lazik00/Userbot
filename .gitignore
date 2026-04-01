@@ -82,6 +82,8 @@ secrets.env
 # Logs and runtime
 *.log
 runtime/
+ai_state.json
+telegram_login_qr.png
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -117,4 +119,3 @@ session_name.session
 session_name.session-journal
 
 # End of .gitignore
-

@@ -1,0 +1,14 @@
+.git
+.gitignore
+.idea
+.venv
+venv
+__pycache__/
+*.py[cod]
+*.session
+*.session-journal
+*.log
+.env
+.env.*
+ai_state.json
+telegram_login_qr.png
