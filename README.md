@@ -92,6 +92,8 @@ docker compose up
 - сохранять `*.session`, `ai_state.json` и другие runtime-файлы на хост-машине;
 - не терять сессию после перезапуска контейнера.
 
+Если в корне проекта уже есть `session_name.session` или `session_name.session-journal`, они также попадут в Docker image во время `docker compose build`. Но при запуске через compose bind mount с хоста всё равно будет иметь приоритет.
+
 ### Фоновый запуск
 
 После первого успешного логина можно запускать в фоне:
@@ -116,6 +118,7 @@ docker compose down
 
 - Файл `.env` должен находиться в корне проекта, потому что `docker-compose.yml` подключает его через `env_file`.
 - Не коммитьте `.env`, `*.session`, `ai_state.json` и другие локальные runtime-файлы.
+- Если в image попадает `session_name.session`, воспринимайте этот образ как секретный артефакт и не публикуйте его в общий registry.
 - Если меняли `requirements.txt`, пересоберите образ: `docker compose build --no-cache`.
 
 ## Безопасность и работа с сессиями
